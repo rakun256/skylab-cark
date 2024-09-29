@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SKY LAB Çarkıfelek</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="header">
+        <img src="skylab-logo-pink.png" alt="Spin" />
+        <h1>SKY LAB ÇARKIFELEK</h1>
+    </div>
+    
+    <div class="container">
+      <div class="spinBtn">
+        <img src="skylab-siyah-logo.png" alt="Spin" />
+      </div>
+      <div class="wheel" id="wheel"></div>
+    </div>
+
+    <script src="wheelData.js"></script>
+    <script>
+      let wheel = document.querySelector(".wheel");
+      let spinBtn = document.querySelector(".spinBtn");
+      let totalDegree = 360;
+      let numberOfSegments = 5; // Çarktaki dilim sayısı
+      let segmentDegree = totalDegree / numberOfSegments; // Her dilimin açısı
+
+      // Çarkın iğnesinin sabit pozisyonu üst kısımda (0 dereceye denk gelir)
+      let needlePosition = 0; // İğne 0 derece pozisyonunda, çark üst kısmına denk geliyor
+
+      function populateWheel() {
+        let wheelData = getWheelData();
+        wheelData.forEach((item, index) => {
+          const numberDiv = document.createElement("div");
+          numberDiv.classList.add("number");
+          numberDiv.style.setProperty("--i", index + 1);
+          numberDiv.style.setProperty("--clr", item.color);
+          numberDiv.innerHTML = `<span>${item.value}</span>`;
+          wheel.appendChild(numberDiv);
+        });
+      }
+
+      // Çarkın dönüşünden sonra doğru `nth-child`ı bul
+      function getNthChildFromRotation(rotationDegree) {
+        // Çarkın toplam dönüşünü 360 derece ile mod al
+        let normalizedRotation = rotationDegree % totalDegree;
+        let nthChild = Math.floor(normalizedRotation / segmentDegree) + 1;
+
+        // Dönüş sonunda iğnenin gösterdiği dilim `nth-child` olarak döndürülüyor
+        return nthChild;
+      }
+
+      spinBtn.onclick = function () {
+        let wheelData = getWheelData();
+        let spins = Math.floor(Math.random() * 5) + 10; // Çarkın tam dönüş sayısı (5 ila 10 arası)
+        let randomAngle = Math.random() * 360; // Rasgele bir açı
+        let finalRotation = spins * 360 + randomAngle;
+
+        wheel.style.transform = `rotate(${finalRotation}deg)`;
+
+        setTimeout(() => {
+          // Dönüş bittikten sonra doğru nth-child'ı bul
+          let nthChild = getNthChildFromRotation(finalRotation);
+
+          // Kazanan dilimi wheelData'dan bul ve alert ile göster
+          let result = wheelData[nthChild - 1]; // nth-child sayısı 1'den başladığı için -1 yaptık
+          //alert(`Kazandınız! Ödülünüz: ${result.value}`);
+        }, 4000); // Çarkın dönüş süresiyle senkronize edin (5 saniye)
+      };
+
+      window.onload = populateWheel;
+    </script>
+  </body>
+</html>
