@@ -1,9 +1,9 @@
 function getWheelData() {
     return [
-        { value: "Çanta", color: "#db7093", percent: 0.2 }, 
-        { value: "Redbull", color: "#20b2aa", percent: 0.2 },  
-        { value: "Defter", color: "#daa520", percent: 0.2 }, 
-        { value: "Kalem", color: "#ff340f", percent: 0.2 }, 
-        { value: "Anahtarlık", color: "#4169e1", percent: 0.2 }   
+      { value: " Sisal Çanta", color: "#db7093", percent: 10 }, // 50% şans
+      { value: "Redbull", color: "#20b2aa", percent: 30 },  // 10% şans
+      { value: "Defter", color: "#daa520", percent: 20 },   // 10% şans
+      { value: "Kalem", color: "#ff340f", percent: 30 },    // 10% şans
+      { value: "Anahtarlık", color: "#4169e1", percent: 10 } // 20% şans
     ];
 }

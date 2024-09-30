@@ -13,8 +13,8 @@
   </head>
   <body>
     <div class="header">
-        <img src="skylab-logo-pink.png" alt="Spin" />
-        <h1>SKY LAB ÇARKIFELEK</h1>
+      <img src="skylab-logo-pink.png" alt="Skylab Logo" />
+      <h1>SKY LAB ÇARKIFELEK</h1>
     </div>
     
     <div class="container">
@@ -24,58 +24,78 @@
       <div class="wheel" id="wheel"></div>
     </div>
 
+    <!-- Modal -->
+    <div id="resultModal" class="modal">
+      <div class="modal-content">
+        <button id="retryBtn" class="retryBtn">YENİDEN ÇEVİR</button>
+      </div>
+    </div>
+
     <script src="wheelData.js"></script>
     <script>
       let wheel = document.querySelector(".wheel");
       let spinBtn = document.querySelector(".spinBtn");
-      let totalDegree = 360;
-      let numberOfSegments = 5; // Çarktaki dilim sayısı
-      let segmentDegree = totalDegree / numberOfSegments; // Her dilimin açısı
+      let retryBtn = document.querySelector("#retryBtn");
+      let resultModal = document.querySelector("#resultModal");
+      let isSpinning = false; // Çarkın dönüp dönmediğini kontrol etmek için
 
-      // Çarkın iğnesinin sabit pozisyonu üst kısımda (0 dereceye denk gelir)
-      let needlePosition = 0; // İğne 0 derece pozisyonunda, çark üst kısmına denk geliyor
-
+      // Çarktaki seçenekleri çarka ekleyelim
       function populateWheel() {
         let wheelData = getWheelData();
+        let segmentAngle = 360 / wheelData.length;
         wheelData.forEach((item, index) => {
           const numberDiv = document.createElement("div");
           numberDiv.classList.add("number");
           numberDiv.style.setProperty("--i", index + 1);
           numberDiv.style.setProperty("--clr", item.color);
+          numberDiv.style.transform = `rotate(${index * segmentAngle}deg)`;
           numberDiv.innerHTML = `<span>${item.value}</span>`;
           wheel.appendChild(numberDiv);
         });
       }
 
-      // Çarkın dönüşünden sonra doğru `nth-child`ı bul
-      function getNthChildFromRotation(rotationDegree) {
-        // Çarkın toplam dönüşünü 360 derece ile mod al
-        let normalizedRotation = rotationDegree % totalDegree;
-        let nthChild = Math.floor(normalizedRotation / segmentDegree) + 1;
+      // Belirli bir olasılık değerine göre rastgele segment seçme
+      function getRandomSegment() {
+        let wheelData = getWheelData();
+        let totalPercent = wheelData.reduce((total, item) => total + item.percent, 0);
+        let random = Math.random() * totalPercent;
 
-        // Dönüş sonunda iğnenin gösterdiği dilim `nth-child` olarak döndürülüyor
-        return nthChild;
+        let cumulativePercent = 0;
+        for (let i = 0; i < wheelData.length; i++) {
+            cumulativePercent += wheelData[i].percent;
+            if (random <= cumulativePercent) {
+                return i; // Dönüşün hangi segmente denk geldiğini belirler
+            }
+        }
+        return 0;
       }
 
-      spinBtn.onclick = function () {
-        let wheelData = getWheelData();
-        let spins = Math.floor(Math.random() * 5) + 10; // Çarkın tam dönüş sayısı (5 ila 10 arası)
-        let randomAngle = Math.random() * 360; // Rasgele bir açı
-        let finalRotation = spins * 360 + randomAngle;
+      // Çarkı çevirme fonksiyonu
+      function spinWheel() {
+        if (isSpinning) return; // Çark zaten dönüyorsa işlemi durdur
+        isSpinning = true;
 
-        wheel.style.transform = `rotate(${finalRotation}deg)`;
+        let winningSegmentIndex = getRandomSegment();
+        let wheelData = getWheelData();
+        let segmentAngle = 360 / wheelData.length;
+        let randomAngle = Math.random() * segmentAngle; // Segment açısına göre rastgele bir açı
+
+        let finalAngle = (3 * 360) + (winningSegmentIndex * segmentAngle) + randomAngle; // En az 3 tam tur + rastgele açı
+
+        wheel.style.transition = "transform 4s ease-out";
+        wheel.style.transform = `rotate(${finalAngle}deg)`;
 
         setTimeout(() => {
-          // Dönüş bittikten sonra doğru nth-child'ı bul
-          let nthChild = getNthChildFromRotation(finalRotation);
+            isSpinning = false;
+            resultModal.style.display = "flex"; // Modalı göster
+        }, 4000); // 4 saniye sonra çark duracak
+      }
 
-          // Kazanan dilimi wheelData'dan bul ve alert ile göster
-          let result = wheelData[nthChild - 1]; // nth-child sayısı 1'den başladığı için -1 yaptık
-          //alert(`Kazandınız! Ödülünüz: ${result.value}`);
-        }, 4000); // Çarkın dönüş süresiyle senkronize edin (5 saniye)
-      };
+      spinBtn.addEventListener("click", spinWheel);
+      retryBtn.addEventListener("click", () => location.reload()); // Sayfayı yenile
 
-      window.onload = populateWheel;
+      // Çarkı başlat
+      populateWheel();
     </script>
   </body>
 </html>
